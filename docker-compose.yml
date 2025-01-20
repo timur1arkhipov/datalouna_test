@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  postgres:
+    build: .
+    container_name: postgres_container
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: datalouna
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--requirepass", "redis"]
+    environment:
+      REDIS_PASSWORD: redis
+    restart: unless-stopped
