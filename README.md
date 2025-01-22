@@ -1,6 +1,7 @@
 # Test task for DataLouna
 
 ## API:
+### **GET** `/auth/check-auth`
 ### **POST** `/auth/register`
 **Params:**
 ```json
