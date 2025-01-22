@@ -1,5 +1,4 @@
-import { sql } from "../../index"
-import { ProductRepository } from "./products.repository"
+import type { ProductRepository } from "./products.repository"
 
 export class ProductService {
   private repository: ProductRepository
@@ -13,8 +12,8 @@ export class ProductService {
   }
 
   async purchaseProduct(userId: number, productId: number, quantity: number) {
-    return await sql.begin(async () => {
-      const product = await this.repository.getProductById(productId)
+    return await this.repository.transaction(async (trx) => {
+      const product = await this.repository.getProductById(productId, trx)
 
       if (!product) {
         throw new Error("Product not found")
@@ -22,20 +21,22 @@ export class ProductService {
 
       const totalPrice = product.price * quantity
 
-      const user = await this.repository.getUserBalance(userId)
+      // блок строки при чтении
+      const user = await this.repository.getUserBalanceForUpdate(userId, trx)
 
       if (user.balance < totalPrice) {
-        throw new Error("Insufficient balance")
+        throw new Error("Wrong balance")
       }
 
-      const updatedUser = await this.repository.updateUserBalance(userId, user.balance - totalPrice)
+      const updatedUser = await this.repository.updateUserBalance(userId, user.balance - totalPrice, trx)
 
-      await this.repository.createPurchase(userId, productId, quantity, totalPrice)
+      await this.repository.createPurchase(userId, productId, quantity, totalPrice, trx)
 
       return {
-        message: "Purchase successful",
+        message: "Purchase is done",
         updatedBalance: updatedUser.balance,
       }
     })
   }
 }
+

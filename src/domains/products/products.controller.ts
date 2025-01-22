@@ -29,7 +29,11 @@ export class ProductController {
       res.json(result)
     } catch (error) {
       console.error("Error processing purchase:", error)
-      res.status(400).json({ error: "Error processing purchase" })
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message })
+      } else {
+        res.status(400).json({ error: "Error processing purchase" })
+      }
     }
   }
 }
