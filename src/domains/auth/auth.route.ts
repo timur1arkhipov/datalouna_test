@@ -7,7 +7,8 @@ const authController = new AuthController()
 
 authRoutes.post("/register", authController.register)
 authRoutes.post("/login", authController.login)
-authRoutes.post("/logout", authController.logout)
+authRoutes.post("/logout", isAuthenticated, authController.logout)
 authRoutes.post("/change-password", isAuthenticated, authController.changePassword)
+authRoutes.get("/check-auth", authController.checkAuthStatus)
 
 export default authRoutes
